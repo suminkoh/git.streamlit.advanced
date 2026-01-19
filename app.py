@@ -15,6 +15,8 @@ import os
 MY_NAME = os.getenv('MY_NAME')
 st.header(MY_NAME)
 
+
+
 def get_krx_company_list() -> pd.DataFrame:
     try:
         # 파이썬 및 인터넷의 기본 문자열 인코딩 방식- UTF-8

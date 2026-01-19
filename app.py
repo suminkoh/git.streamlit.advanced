@@ -76,6 +76,7 @@ if confirm_btn:
                 end_date = selected_dates[1].strftime("%Y%m%d")
                 
                 price_df = fdr.DataReader(stock_code, start_date, end_date)
+                price_df.reset_index(inplace=True)
                 
             if price_df.empty:
                 st.info("해당 기간의 주가 데이터가 없습니다.")

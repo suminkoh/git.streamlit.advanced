@@ -84,19 +84,36 @@ if confirm_btn:
                 st.subheader(f"[{company_name}] 주가 데이터")
                 st.dataframe(price_df.tail(10), width="stretch")
 
-               # 캔들차트 생성
-                fig = go.Figure(data=[go.Candlestick(
-                    x=price_df['Date'],
-                    open=price_df['Open'],
-                    high=price_df['High'],
-                    low=price_df['Low'],
-                    close=price_df['Close'],
-                    increasing_line_color='#FF3333', # 더 선명한 빨강
-                    decreasing_line_color='#3333FF', # 더 선명한 파랑
-                    name="주가" 
+                tab1, tab2 = st.tabs(["📈 주가 차트", "📋 데이터 상세 내역"])
+
+                with tab1:
+                    # 캔들차트 설정
+                    fig = go.Figure(data=[go.Candlestick(
+                        x=price_df['Date'],
+                        open=price_df['Open'],
+                        high=price_df['High'],
+                        low=price_df['Low'],
+                        close=price_df['Close'],
+                        increasing_line_color='#FF3333',
+                        decreasing_line_color='#3333FF',
+                        name="주가"
                     )])
-                # Streamlit에 표시
-                st.plotly_chart(fig, use_container_width=True)
+                    
+                    fig.update_layout(
+                        title=f"<b>{company_name} 차트</b>",
+                        xaxis_title="날짜",
+                        yaxis_title="가격",
+                        plot_bgcolor='white',
+                        hovermode='x unified'
+                    )
+                    
+                    # 차트 출력
+                    st.plotly_chart(fig, use_container_width=True)
+
+            with tab2:
+                st.subheader(f"최근 {company_name} 데이터 내역")
+                # 최신 날짜가 위로 오도록 정렬해서 표시
+                st.dataframe(price_df.sort_values(by='Date', ascending=False), use_container_width=True)
 
                 # 엑셀 다운로드 기능
                 output = BytesIO()

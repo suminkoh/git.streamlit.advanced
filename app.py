@@ -37,6 +37,7 @@ def get_krx_company_list() -> pd.DataFrame:
 st.sidebar.header("📈상장주식 주가 조회 서비스")
 st.header("📈상장주식 주가 조회 서비스")
 
+@st.cache_data
 def get_stock_code_by_company(company_name: str) -> str:
     # 만약 입력값이 숫자 6자리라면 그대로 반환
     if company_name.isdigit() and len(company_name) == 6:
@@ -83,7 +84,7 @@ if confirm_btn:
             if price_df.empty:
                 st.info("해당 기간의 주가 데이터가 없습니다.")
             else:
-                tab1, tab2, tab3 = st.tabs(["📈 주가 차트", "📋 데이터 상세 내역", "📰 관련 뉴스"])
+                tab1, tab2 = st.tabs(["📈 주가 차트", "📋 데이터 상세 내역"])
 
                 with tab1:
                     # (기존 차트 코드 그대로 사용)
@@ -101,54 +102,14 @@ if confirm_btn:
                 with tab2:
                     st.subheader(f"최근 {company_name} 데이터 내역")
                     st.dataframe(price_df.sort_values(by='Date', ascending=False), use_container_width=True)
-
-                with tab3:
-                    st.subheader(f"🔍 {company_name} 관련 최신 뉴스")
-                    
-                    # 1. 시장 구분 (KOSPI 또는 KOSDAQ) 확인 로직
-                    # (이미 상장사 리스트를 가져오는 함수가 있다면 그 안에서 '시장구분' 컬럼을 활용하세요)
-                    try:
-                        # 간단하게 구분하기 위해: 코스닥 종목은 보통 0이나 1로 시작하지 않는 경우가 많지만
-                        # 가장 확실한 건 StockListing 데이터를 대조하는 것입니다.
-                        # 여기서는 우선 .KS로 시도하고, 안 나오면 .KQ로 시도하는 범용 코드를 제안합니다.
-                        
-                        target_ticker = f"{stock_code}.KS" # 기본은 코스피
-                        ticker_obj = yf.Ticker(target_ticker)
-                        news_list = ticker_obj.news
-                        
-                        # 만약 코스피로 뉴스가 없다면 코스닥(.KQ)으로 재시도
-                        if not news_list:
-                            target_ticker = f"{stock_code}.KQ"
-                            ticker_obj = yf.Ticker(target_ticker)
-                            news_list = ticker_obj.news
-
-                        # 2. 뉴스 출력 (데이터가 있을 때만 실행)
-                        if news_list:
-                            for item in news_list[:10]:
-                                title = item.get('title')
-                                link = item.get('link')
-                                publisher = item.get('publisher')
-                                pub_time = item.get('providerPublishTime')
-
-                                # 실제 데이터가 들어있는지 최종 확인
-                                if title and link:
-                                    with st.container():
-                                        col1, col2 = st.columns([3, 1])
-                                        with col1:
-                                            st.markdown(f"#### [{title}]({link})")
-                                            st.write(f"출처: {publisher}")
-                                        with col2:
-                                            date_str = datetime.datetime.fromtimestamp(pub_time).strftime('%Y-%m-%d')
-                                            st.write(f"📅 {date_str}")
-                                        st.divider()
-                                else:
-                                    continue # 데이터가 부실한 항목은 건너뜀
-                        else:
-                            st.info("야후 파이낸스에서 뉴스 데이터를 찾을 수 없습니다. (미등록 종목이거나 영문 뉴스만 제공될 수 있습니다.)")
-
-                    except Exception as e:
-                        st.error(f"뉴스 로드 중 오류 발생: {e}")
-
+                
+                with st.sidebar:
+                    st.write("---")
+                    st.subheader("📌 종목 요약 정보")
+                    st.write(f"**종목명:** {company_name}")
+                    st.write(f"**종목코드:** {stock_code}")
+                    st.success(f"조회 기간: {selected_dates[0]} ~ {selected_dates[1]}")
+                                
                 # 엑셀 다운로드 기능
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='openpyxl') as writer:

@@ -98,6 +98,8 @@ if len(selected_dates) == 2:
         with tab3:
             st.subheader("🔮 향후 30일 추세 예측")
             st.write("최근 1년간의 주가 흐름을 바탕으로 계산된 산술적 추세선입니다. (투자 참고용)")
+            st.subheader("⚠️경고")
+            st.write("주가는 뉴스, 공시, 정치적 상황 등 외부 변수에 너무 민감합니다. 이 모델은 오직 '과거의 패턴'만 보고 계산하므로 참고용으로만 써야 합니다.")
             
             fig_pred = go.Figure()
             # 과거 주가

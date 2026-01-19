@@ -108,7 +108,11 @@ if confirm_btn:
                     st.subheader("📌 종목 요약 정보")
                     st.write(f"**종목명:** {company_name}")
                     st.write(f"**종목코드:** {stock_code}")
+                    st.write(f"**최고가 (종가):** {int(price_df['Close'].max()):,}원")
+                    st.write(f"**최저가 (종가):** {int(price_df['Close'].min()):,}원")
+                    st.write(f"**평균 거래량:** {int(price_df['Volume'].mean()):,}주")
                     st.success(f"조회 기간: {selected_dates[0]} ~ {selected_dates[1]}")
+                    
                                 
                 # 엑셀 다운로드 기능
                 output = BytesIO()

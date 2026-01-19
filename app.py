@@ -16,8 +16,8 @@ import yfinance as yf
 from dotenv import load_dotenv
 
 
-MY_NAME = os.getenv('MY_NAME')
-st.header(MY_NAME)
+hidden_value = os.getenv('MY_NAME')
+st.header(hidden_value)
 
 
 @st.cache_data # 캐싱 

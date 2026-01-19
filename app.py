@@ -32,6 +32,8 @@ def get_krx_company_list() -> pd.DataFrame:
         st.error(f"상장사 명단을 불러오는 데 실패했습니다: {e}")
         return pd.DataFrame(columns=['회사명', '종목코드'])
 
+st.header("📈상장주식 주가 조회 서비스")
+
 def get_stock_code_by_company(company_name: str) -> str:
     # 만약 입력값이 숫자 6자리라면 그대로 반환
     if company_name.isdigit() and len(company_name) == 6:

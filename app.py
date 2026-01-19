@@ -90,8 +90,11 @@ if confirm_btn:
                     open=price_df['Open'],
                     high=price_df['High'],
                     low=price_df['Low'],
-                    close=price_df['Close']
-                )])
+                    close=price_df['Close'],
+                    increasing_line_color='#FF3333', # 더 선명한 빨강
+                    decreasing_line_color='#3333FF', # 더 선명한 파랑
+                    name="주가" 
+                    )])
                 # Streamlit에 표시
                 st.plotly_chart(fig, use_container_width=True)
 

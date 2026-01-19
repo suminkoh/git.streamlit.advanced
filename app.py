@@ -13,12 +13,14 @@ import koreanize_matplotlib
 import os
 import plotly.graph_objects as go
 import yfinance as yf
+from dotenv import load_dotenv
+
 
 MY_NAME = os.getenv('MY_NAME')
 st.header(MY_NAME)
 
 
-
+@st.cache_data # 캐싱 
 def get_krx_company_list() -> pd.DataFrame:
     try:
         # 파이썬 및 인터넷의 기본 문자열 인코딩 방식- UTF-8
@@ -37,7 +39,7 @@ def get_krx_company_list() -> pd.DataFrame:
 st.sidebar.header("📈상장주식 주가 조회 서비스")
 st.header("📈상장주식 주가 조회 서비스")
 
-@st.cache_data
+
 def get_stock_code_by_company(company_name: str) -> str:
     # 만약 입력값이 숫자 6자리라면 그대로 반환
     if company_name.isdigit() and len(company_name) == 6:

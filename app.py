@@ -104,26 +104,36 @@ if confirm_btn:
 
                 with tab3:
                     st.subheader(f"🔍 {company_name} 관련 최신 뉴스")
-                    ticker_for_news = f"{stock_code}.KS"
                     
-                    # 뉴스만 yfinance에서 가져오기
+                    # yfinance를 이용해 뉴스 가져오기
+                    ticker_for_news = f"{stock_code}.KS"
                     news_list = yf.Ticker(ticker_for_news).news
+                    
+                    if news_list and len(news_list) > 0:
+                        for item in news_list[:10]:
+                            # 'title'이 없을 경우를 대비해 .get() 사용
+                            title = item.get('title', '제목 없음')
+                            link = item.get('link', '#')
+                            publisher = item.get('publisher', '정보 없음')
+                            
+                            # 발행 시간 처리 (키가 없을 경우 현재 시간 사용)
+                            pub_time_raw = item.get('providerPublishTime')
+                            if pub_time_raw:
+                                pub_date = datetime.datetime.fromtimestamp(pub_time_raw).strftime('%Y-%m-%d')
+                            else:
+                                pub_date = "날짜 미상"
 
-                    if news_list:
-                        for item in news_list[:10]: # 최신 뉴스 10개만 표시
                             with st.container():
                                 col1, col2 = st.columns([3, 1])
                                 with col1:
-                                    # 뉴스 제목에 링크 걸기
-                                    st.markdown(f"#### [{item['title']}]({item['link']})")
-                                    st.write(f"발행처: {item.get('publisher', '알 수 없음')}")
+                                    # 제목 출력
+                                    st.markdown(f"#### [{title}]({link})")
+                                    st.write(f"출처: {publisher}")
                                 with col2:
-                                    # 발행 시간 표시 (타임스탬프 변환)
-                                    from datetime import datetime
-                                    pub_time = datetime.fromtimestamp(item['providerPublishTime'])
-                                    st.write(f"📅 {pub_time.strftime('%Y-%m-%d')}")
-                                st.divider() # 뉴스 사이 구분선
-
+                                    st.write(f"📅 {pub_date}")
+                                st.divider()
+                    else:
+                        st.info("현재 해당 종목의 관련 뉴스를 불러올 수 없습니다.")
                 # 엑셀 다운로드 기능
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='openpyxl') as writer:

@@ -11,6 +11,7 @@ import FinanceDataReader as fdr
 import matplotlib.pyplot as plt
 import koreanize_matplotlib
 import os
+import plotly.graph_objects as go
 
 MY_NAME = os.getenv('MY_NAME')
 st.header(MY_NAME)
@@ -32,6 +33,7 @@ def get_krx_company_list() -> pd.DataFrame:
         st.error(f"상장사 명단을 불러오는 데 실패했습니다: {e}")
         return pd.DataFrame(columns=['회사명', '종목코드'])
 
+st.sidebar.header("📈상장주식 주가 조회 서비스")
 st.header("📈상장주식 주가 조회 서비스")
 
 def get_stock_code_by_company(company_name: str) -> str:
@@ -81,11 +83,16 @@ if confirm_btn:
                 st.subheader(f"[{company_name}] 주가 데이터")
                 st.dataframe(price_df.tail(10), width="stretch")
 
-                # Matplotlib 시각화
-                fig, ax = plt.subplots(figsize=(12, 5))
-                price_df['Close'].plot(ax=ax, grid=True, color='red')
-                ax.set_title(f"{company_name} 종가 추이", fontsize=15)
-                st.pyplot(fig)
+               # 캔들차트 생성
+                fig = go.Figure(data=[go.Candlestick(
+                    x=price_df['Date'],
+                    open=price_df['Open'],
+                    high=price_df['High'],
+                    low=price_df['Low'],
+                    close=price_df['Close']
+                )])
+                # Streamlit에 표시
+                st.plotly_chart(fig, use_container_width=True)
 
                 # 엑셀 다운로드 기능
                 output = BytesIO()

@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import koreanize_matplotlib
 import os
 import plotly.graph_objects as go
+import yfinance as yf
 
 MY_NAME = os.getenv('MY_NAME')
 st.header(MY_NAME)
@@ -43,6 +44,7 @@ def get_stock_code_by_company(company_name: str) -> str:
     
     company_df = get_krx_company_list()
     codes = company_df[company_df['회사명'] == company_name]['종목코드'].values
+    ticker_symbol = f"{codes}.KS"
     if len(codes) > 0:
         return codes[0]
     else:
@@ -75,19 +77,16 @@ if confirm_btn:
                 start_date = selected_dates[0].strftime("%Y%m%d")
                 end_date = selected_dates[1].strftime("%Y%m%d")
                 
-                price_df = fdr.DataReader(stock_code, start_date, end_date)
+                price_df = fdr.DataReader(stock_code, selected_dates[0], selected_dates[1])
                 price_df.reset_index(inplace=True)
                 
             if price_df.empty:
                 st.info("해당 기간의 주가 데이터가 없습니다.")
             else:
-                st.subheader(f"[{company_name}] 주가 데이터")
-                st.dataframe(price_df.tail(10), width="stretch")
-
-                tab1, tab2 = st.tabs(["📈 주가 차트", "📋 데이터 상세 내역"])
+                tab1, tab2, tab3 = st.tabs(["📈 주가 차트", "📋 데이터 상세 내역", "📰 관련 뉴스"])
 
                 with tab1:
-                    # 캔들차트 설정
+                    # (기존 차트 코드 그대로 사용)
                     fig = go.Figure(data=[go.Candlestick(
                         x=price_df['Date'],
                         open=price_df['Open'],
@@ -95,25 +94,35 @@ if confirm_btn:
                         low=price_df['Low'],
                         close=price_df['Close'],
                         increasing_line_color='#FF3333',
-                        decreasing_line_color='#3333FF',
-                        name="주가"
+                        decreasing_line_color='#3333FF'
                     )])
-                    
-                    fig.update_layout(
-                        title=f"<b>{company_name} 차트</b>",
-                        xaxis_title="날짜",
-                        yaxis_title="가격",
-                        plot_bgcolor='white',
-                        hovermode='x unified'
-                    )
-                    
-                    # 차트 출력
                     st.plotly_chart(fig, use_container_width=True)
 
-            with tab2:
-                st.subheader(f"최근 {company_name} 데이터 내역")
-                # 최신 날짜가 위로 오도록 정렬해서 표시
-                st.dataframe(price_df.sort_values(by='Date', ascending=False), use_container_width=True)
+                with tab2:
+                    st.subheader(f"최근 {company_name} 데이터 내역")
+                    st.dataframe(price_df.sort_values(by='Date', ascending=False), use_container_width=True)
+
+                with tab3:
+                    st.subheader(f"🔍 {company_name} 관련 최신 뉴스")
+                    ticker_for_news = f"{stock_code}.KS"
+                    
+                    # 뉴스만 yfinance에서 가져오기
+                    news_list = yf.Ticker(ticker_for_news).news
+
+                    if news_list:
+                        for item in news_list[:10]: # 최신 뉴스 10개만 표시
+                            with st.container():
+                                col1, col2 = st.columns([3, 1])
+                                with col1:
+                                    # 뉴스 제목에 링크 걸기
+                                    st.markdown(f"#### [{item['title']}]({item['link']})")
+                                    st.write(f"발행처: {item.get('publisher', '알 수 없음')}")
+                                with col2:
+                                    # 발행 시간 표시 (타임스탬프 변환)
+                                    from datetime import datetime
+                                    pub_time = datetime.fromtimestamp(item['providerPublishTime'])
+                                    st.write(f"📅 {pub_time.strftime('%Y-%m-%d')}")
+                                st.divider() # 뉴스 사이 구분선
 
                 # 엑셀 다운로드 기능
                 output = BytesIO()
